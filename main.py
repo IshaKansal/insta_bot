@@ -5,11 +5,32 @@ access_token = "1438763650.15994de.413f7ba570f34e6fa0f36fc4bdb6a021"
 # Storing base url in a variable
 base_url = "https://api.instagram.com/v1/"
 
+def get_user_id(instagram_username):
+    # URL with endpoint to search user id
+    url = base_url + "users/search/?q=%s&access_token=%s" % (instagram_username, access_token)
+    print "Get Search Request Url: %s" % url
+    user_info = requests.get(url).json()
+    if user_info['meta']['code'] == 200:
+        if len(user_info['data']):
+            return user_info['data'][0]['id']
+        else:
+            return None
+    else:
+        print "Status code is other than 200"
+
 # Function to retrieve self information
-def self_info():
-    # adding endpoints and access token in  base url
-    url = base_url + "users/self/?access_token=" + access_token
-    print "GET Request Url: %s" % url
+def users_info(instagram_username):
+    # Checking if user wants to retrieve own info..If yes endpoint for self is used
+    if instagram_username.capitalize() == "Self":
+        # adding endpoints and access token in  base url
+        url = (base_url + "users/self/?access_token=%s") % access_token
+    # If user wants to access other user's info
+    else:
+        # Calling get_user_id(name) function to get  id of user and storing that id
+        user_id = get_user_id(instagram_username)
+        # Endpoint for accessing other user'info will be used
+        url = (base_url + "users/%s/?access_token=%s") % (user_id, access_token)
+    print "GET User_info Request Url: %s" % url
     # Fetching data using get method of request library....data is returned in json object form and storing in variable
     user_info = requests.get(url).json()
     # Checking if status code is 200 or not
@@ -32,6 +53,11 @@ def self_info():
         # Is status code is not 200
         print"Status code other than 200"
 
+
+
 # calling self_info() function
-self_info()
+users_info("Self")
+users_info("priyanka_verma96")
+users_info("iamhssingh")
+
 
