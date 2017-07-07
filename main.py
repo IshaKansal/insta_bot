@@ -1,3 +1,4 @@
+import urllib
 import requests
 
 # Storing access token in a variable
@@ -75,7 +76,10 @@ def get_recent_post(insta_username):
     if media['meta']['code'] == 200:
         if len(media['data']):
             for i in range(len(media['data'])):
-                print media['data'][i]['id']
+                image_name = media['data'][i]['id'] + ".jpeg"
+                image_url = media['data'][i]['images']['standard_resolution']['url']
+                urllib.urlretrieve(image_url, image_name)
+                print "Your image has been downloaded!!!"
         else:
             print "No Post is there"
     else:
