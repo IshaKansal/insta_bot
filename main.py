@@ -5,6 +5,8 @@ import urllib
 access_token = "1438763650.15994de.413f7ba570f34e6fa0f36fc4bdb6a021"
 # Storing base url in a variable
 base_url = "https://api.instagram.com/v1/"
+# storing username
+username = "kansal.isha"
 
 # Function to retrieve  users id
 def get_user_id(instagram_username):
@@ -28,22 +30,13 @@ def get_user_id(instagram_username):
         print "Status code is other than 200"
 
 # Function to get post id
-def get_post_id(instagram_username):
-    # Check if user is itself
-    if instagram_username is "Self":
-        # If yes user will enter hi/her username
-        self_name = raw_input("Enter your own username")
-        # Function call to get user-id of itself
-        user_id = get_user_id(self_name)
-    else:
-        # If for another user
-        user_id = get_user_id(instagram_username)
+def get_post_id(instagram_user_id):
     # Checking if user exist or not...If not thn exit
-    if user_id is None:
+    if instagram_user_id is None:
         print "user does not exist"
         exit()
     # url to get the most recent media of user or another user
-    url = (base_url + 'users/%s/media/recent/?access_token=%s') % (user_id, access_token)
+    url = (base_url + 'users/%s/media/recent/?access_token=%s') % (instagram_user_id, access_token)
     # Display get url
     print "Get post id url: %s" % url
     # storing the data in a variable...data returned by the url is in json form
@@ -54,7 +47,7 @@ def get_post_id(instagram_username):
     if media['meta']['code'] == 200:
         # Checking if data is there or not
         if len(media['data']):
-            # Dispaly the id's of most recent posts
+            # Display the id's of most recent posts
             for i in range(len(media['data'])):
                 print ("%s." + media['data'][i]['id']) % j
                 j += 1
@@ -99,16 +92,11 @@ def users_info(instagram_username):
         print"Status code other than 200"
 
 # Function to get most recent post
-def get_recent_post(insta_username):
-    # Check if user is itself
-    if insta_username is "Self":
-        url = (base_url + "users/self/media/recent/?access_token=%s") % access_token
-    else:
-        user_id = get_user_id(insta_username)
-        if user_id is None:
-            print "User does not exist"
-            exit()
-        url = (base_url + "users/%s/media/recent/?access_token=%s") % (user_id, access_token)
+def get_recent_post(instagram_user_id):
+    if instagram_user_id is None:
+        print "User does not exist"
+        exit()
+    url = (base_url + "users/%s/media/recent/?access_token=%s") % (instagram_user_id, access_token)
     print "Get recent post request url:%s" % url
     media = requests.get(url).json()
     if media['meta']['code'] == 200:
@@ -123,30 +111,10 @@ def get_recent_post(insta_username):
     else:
         print "Status code other than 200"
 
-def name1():
-    # url to fetch self details
-    url = (base_url + "users/self/?access_token=%s") % access_token
-    # Display get url
-    print "GET User_info Request Url: %s" % url
-    # Fetching data using get method of request library....data is returned in json object form and storing in variable
-    user_info = requests.get(url).json()
-    # Checking if status code is 200 or not
-    if user_info['meta']['code'] == 200:
-        # If 200 Checking there is some info in json data array
-        if len(user_info['data']):
-            # If true returning username
-            return user_info['data']['username']
-        else:
-            #if no data thn user does not exist
-            print "User does not exist"
-    else:
-        # If request url is incorrect or there is some other problem
-        print "Status code other than 200"
-
 # Function to get a list of likes
-def get_likes_list(instagram_username):
+def get_likes_list(instagram_user_id):
     # Function call to get id of post and save it in a variable
-    media_id = get_post_id(instagram_username)
+    media_id = get_post_id(instagram_user_id)
     # list to store the name of users who like the post
     list1 = []
     # If there are no posts
@@ -181,9 +149,9 @@ def get_likes_list(instagram_username):
             print "Status code other than 200"
 
 # Function to like a post
-def like_post(instagram_username):
+def like_post(instagram_user_id):
     # Get id of post
-    media_id = get_post_id(instagram_username)
+    media_id = get_post_id(instagram_user_id)
     # If id is none then there is no post
     if media_id is None:
         print "There is no post"
@@ -205,36 +173,31 @@ def like_post(instagram_username):
 
 
 # Function to check post will be liked or not
-def like_a_post(instagram_username):
+def like_a_post(instagram_user_id):
     # Get list of users who liked the post
-    list2 = get_likes_list(instagram_username)
-    # Get own name
-    self_name = name1()
-    # If the post is already liked by some users
+    list2 = get_likes_list(instagram_user_id)
     if list2 is not None:
         # Check if it is liked by self or not...if yes display message
-        if self_name in list2:
+        if username in list2:
             print "You have already liked this post"
         else:
             # call ca function to like a post
-            like_post(instagram_username)
+            like_post(instagram_user_id)
     # If post is not liked by anyone then call a function to like post
     else:
-        like_post(instagram_username)
+        like_post(instagram_user_id)
 
 # Function to delete like from post
-def unlike_a_post(instagram_username):
+def unlike_a_post(instagram_user_id):
     # Get list of users who liked the post
-    list3 = get_likes_list(instagram_username)
-    # Get own name
-    self_name = name1()
+    list3 = get_likes_list(instagram_user_id)
     # Check if list of likes is empty or user itslef has not loiked the post....then there is nothing to unlike
-    if list3 is None or self_name not in list3:
+    if list3 is None or username not in list3:
         print "Nothing to unlike...or you have not liked this post"
     # If above conditions are not satisfied thn proceed
     else:
         # get id of post to unlike
-        media_id = get_post_id(instagram_username)
+        media_id = get_post_id(instagram_user_id)
         # If no media id
         if media_id is None:
             print "There is no media in this account"
@@ -253,14 +216,30 @@ def unlike_a_post(instagram_username):
             else:
                 print "Status code other than 200"
 
+# Get recent media liked by user
+def recent_media_liked():
+    url = (base_url + "users/self/media/liked/?access_token=%s") % access_token
+    print "Get recent media liked url: %s" % url
+    recent_media = requests.get(url).json()
+    if recent_media['meta']['code'] == 200:
+        if len(recent_media['data']):
+            for i in range(len(recent_media['data'])):
+                print " You have recently like %s post with post id %s" \
+                      % (recent_media['data'][i]['user']['username'],  recent_media['data'][i]['id'])
+        else:
+            print "There is no media you have recently liked"
+    else:
+        print "Status code other than 200"
+
+
 # Function to get list of comments
-def get_comment_list(instagram_username):
-    list4 =[]
-    media_id = get_post_id(instagram_username)
+def get_comment_list(instagram_user_id):
+    list4 = []
+    media_id = get_post_id(instagram_user_id)
     if media_id is None:
         print "There is no media"
     else:
-        url = base_url + "media/%s/comments/?access_token=%s" %(media_id, access_token)
+        url = base_url + "media/%s/comments/?access_token=%s" % (media_id, access_token)
         print "Get request url:%s" % url
         comment_list = requests.get(url).json()
         j = 1
@@ -268,13 +247,36 @@ def get_comment_list(instagram_username):
             if len(comment_list['data']):
                 print "The person who commented on this post are:"
                 for i in range(len(comment_list['data'])):
-                    print ("%s. Comment posted by" ) % j
-                    list4.append(comment_list['data'][i]['username'])
+                    print "%s. Comment: %s Posted by: %s" \
+                          %(j, comment_list['data'][i]['text'], comment_list['data'][i]['from']['username'])
+                    list4.append(comment_list['data'][i]['from']['username'])
                     j += 1
                 return list4
             else:
-                print "No likes on this post"
+                print "No comments on this post"
         else:
+            print "Status code other than 200"
+
+# Function to comment on a post
+def post_comment(instagram_user_id):
+    media_id = get_post_id(instagram_user_id)
+    if media_id is None:
+        print "There is no media"
+    else:
+        # url to like a post
+        url = (base_url + 'media/%s/comments') % media_id
+        comment_text = raw_input("Enter your comment")
+        # Extra information to be given in case of Post method
+        payload = {"access_token": access_token, "text": comment_text}
+        # Display Post url
+        print "Post request url:%s " % url
+        # Requesting post method to like a post and response is stored in a variable
+        comment_post = requests.post(url, payload).json()
+        # If request has been accepted
+        if comment_post['meta']['code'] == 200:
+            print "Comment posted successfully"
+        else:
+            # If request url is incorrect or there is some other problem
             print "Status code other than 200"
 
 # Function to start the application
@@ -284,15 +286,20 @@ def start_bot():
     while show_menu:
         print " 1. Get your own details\n " \
               "2. Get users details by username\n " \
-              "3.Get own recent posts\n " \
+              "3. Get own recent posts\n " \
               "4. Get recent posts of user by username\n" \
               " 5. Like your own post\n" \
               " 6. like other user post\n " \
-              "7. get list of likes on our post\n" \
+              "7. Get list of likes on our post\n" \
               " 8. Get list of like on users post\n" \
               " 9. Unlike our post\n" \
               " 10. Unlike other users post\n" \
-              " 11. Close Application"
+              " 11. Get recent media liked by self\n" \
+              " 12. Post a comment on self post\n" \
+              " 13. Post a comment on user post\n" \
+              " 14. Get list of comments on our post\n" \
+              " 15. Get list of comments on users post \n" \
+              " 16. Close Application"
         # Input the choice from user
         choice = int(raw_input(" Enter your choice"))
         if choice == 1:
@@ -302,26 +309,44 @@ def start_bot():
             user_id = get_user_id(name)
             users_info(user_id)
         elif choice == 3:
-            get_recent_post("Self")
+            get_recent_post("self")
         elif choice == 4:
             name = raw_input("Enter the username of a user")
-            get_recent_post(name)
+            user_id = get_user_id(name)
+            get_recent_post(user_id)
         elif choice == 5:
-            like_a_post("Self")
+            like_a_post("self")
         elif choice == 6:
             name = raw_input("Enter the username of user you want to like a post")
-            like_a_post(name)
+            user_id = get_user_id(name)
+            like_a_post(user_id)
         elif choice == 7:
-            get_likes_list("Self")
+            get_likes_list("self")
         elif choice == 8:
             name = raw_input("Enter the username of user you want to get a list of likes")
-            get_likes_list(name)
+            user_id = get_user_id(name)
+            get_likes_list(user_id)
         elif choice == 9:
-            unlike_a_post("Self")
+            unlike_a_post("self")
         elif choice == 10:
             name = raw_input("Enter the username of user you want to unlike post")
-            unlike_a_post(name)
+            user_id = get_user_id(name)
+            unlike_a_post(user_id)
         elif choice == 11:
+            recent_media_liked()
+        elif choice == 12:
+            post_comment("self")
+        elif choice == 13:
+            name = raw_input("Enter the username of user you want to  post a comment")
+            user_id = get_user_id(name)
+            post_comment(user_id)
+        elif choice == 14:
+            get_comment_list("self")
+        elif choice == 15:
+            name = raw_input("Enter the username of user you want to get list of comments")
+            user_id = get_user_id(name)
+            get_comment_list(user_id)
+        elif choice == 16:
             print " Closing Application.....\n Closed"
             show_menu = False
         else:
