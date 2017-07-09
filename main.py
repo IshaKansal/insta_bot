@@ -1,5 +1,7 @@
 import requests
 import urllib
+from textblob import TextBlob
+from textblob.sentiments import NaiveBayesAnalyzer
 
 # Storing access token in a variable
 access_token = "1438763650.15994de.413f7ba570f34e6fa0f36fc4bdb6a021"
@@ -188,9 +190,9 @@ def unlike_a_post(instagram_user_id):
             # Display delete like url
             print "Delete request url: %s" % url
             # Requesting delete method to like a post and response is stored in a variable
-            del_post = requests.delete(url).json()
+            del_like = requests.delete(url).json()
             # If request is accepted
-            if del_post['meta']['code'] == 200:
+            if del_like['meta']['code'] == 200:
                 print " Successfully unlike the post"
             # If request url is incorrect or there is some other problem
             else:
@@ -222,6 +224,7 @@ def recent_media_liked():
 
 # Function to get list of comments
 def get_comment_list(instagram_user_id):
+    list4 = []
     # Get id of post
     media_id = get_post_id(instagram_user_id)
     # If there are no posts
@@ -247,6 +250,8 @@ def get_comment_list(instagram_user_id):
                     print "%s. Comment: %s Posted by: %s" \
                           % (j, comment_list['data'][i]['text'], comment_list['data'][i]['from']['username'])
                     j += 1
+                    list4.append(comment_list['data'][i]['from']['username'])
+                return list4
             else:
                 # If there are no comments
                 print "No comments on this post"
@@ -278,6 +283,63 @@ def post_comment(instagram_user_id):
         else:
             # If request url is incorrect or there is some other problem
             print "Status code other than 200"
+
+# Function to delete negative comments
+def delete_negative_comments(instagram_user_id):
+    # Get id of post
+    media_id = get_post_id(instagram_user_id)
+    # If there are no posts
+    if media_id is None:
+        print "There is no media"
+    # proceed if media-id is returned
+    else:
+        # Url to get list of comments on a post
+        url = base_url + "media/%s/comments/?access_token=%s" % (media_id, access_token)
+        # Display get request url
+        print "Get request url:%s" % url
+        # Requesting get method to get a list of comments on post and response is stored in a variable
+        comment_list = requests.get(url).json()
+        # If request is accepted
+        if comment_list['meta']['code'] == 200:
+            # If there are comments on post
+            if len(comment_list['data']):
+                # If there are more than one comment
+                for i in range(len(comment_list['data'])):
+                    # Storing the comment
+                    comment_text = comment_list['data'][i]['text']
+                    # Storing comment id
+                    comment_id = comment_list['data'][i]['id']
+                    # Analysing the positivity and negativity of comment
+                    blob = TextBlob(comment_text, analyzer=NaiveBayesAnalyzer())
+                    # If negative....delete the comment
+                    if blob.sentiment.p_neg > blob.sentiment.p_pos:
+                        print "Comment %s is negative" % comment_text
+                        url = (base_url + "media/%s/comments/%s") % (media_id, comment_id)
+                        print "Delete request url :%s" % url
+                        del_comment = requests.delete(url).json()
+                        if del_comment['meta']['code'] == 200:
+                            print "Negative comment deleted"
+                        else:
+                            print "Request is not processed"
+                    # If average ask the user what to do
+                    elif blob.sentiment.p_neg == blob.sentiment.p_pos:
+                        print "Comment is average"
+                        choice = raw_input("Do you want to delete comment(Y/N)??")
+                        # If user says yes delete the comment
+                        if choice.capitalize() == "Y":
+                            url = (base_url + "media/%s/comments/%s") % (media_id, comment_id)
+                            print "Delete request url :%s" % url
+                            del_comment = requests.delete(url).json()
+                            if del_comment['meta']['code'] == 200:
+                                print "Negative comment deleted"
+                            else:
+                                print "Request is not processed"
+                        # otherwise not
+                        else:
+                            print "Comment is not deleted"
+                    # If comment is positive
+                    else:
+                        print "Your comment is positive"
 
 # Function to get most recent post
 def get_recent_post(instagram_user_id):
@@ -352,7 +414,9 @@ def start_bot():
               "13. Post a comment on user post\n" \
               "14. Get list of comments on our post\n" \
               "15. Get list of comments on users post \n" \
-              "16. Close Application"
+              "16. Delete negative comments on our post\n" \
+              "17. Delete negative comments on other user post\n" \
+              "18. Close Application"
         # Input the choice from user
         choice = int(raw_input("Enter your choice"))
         if choice == 1:
@@ -400,7 +464,23 @@ def start_bot():
             user_id = get_user_id(name)
             get_comment_list(user_id)
         elif choice == 16:
-            print " Closing Application.....\n Closed"
+            delete_negative_comments("self")
+        elif choice == 17:
+            name = raw_input("Enter the username of user from whose post you want to delete comments")
+            user_id = get_user_id(name)
+            # get list of comments on post
+            list5 = get_comment_list(user_id)
+            # Checking if there are comments on post
+            if list5 is not None:
+                # If Yes...checking user itself has commented on post or not
+                if username in list5:
+                    # If yes...then delete negative comments
+                    delete_negative_comments(user_id)
+                else:
+                    # If not...no need to delete
+                    print "You have not commented on this post"
+        elif choice == 18:
+            print "Closing Application.....\nClosed"
             show_menu = False
         else:
             print "You entered wrong choice!! Enter your choice from above list"
