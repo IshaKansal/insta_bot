@@ -36,34 +36,34 @@ def get_post_id(instagram_user_id):
     # Checking if user exist or not...If not then exit
     if instagram_user_id is None:
         print "user does not exist"
-        exit()
-    # url to get the most recent media of user or another user
-    url = (base_url + 'users/%s/media/recent/?access_token=%s') % (instagram_user_id, access_token)
-    # Display get url
-    print "Get post id url: %s" % url
-    # storing the data in a variable...data returned by the url is in json form
-    media = requests.get(url).json()
-    # Variable for index like 1, 2, 3...
-    j = 1
-    # Checking if request has been accepted....if accepted thn proceed
-    if media['meta']['code'] == 200:
-        # Checking if data is there or not
-        if len(media['data']):
-            # Display the id's of most recent posts
-            for i in range(len(media['data'])):
-                print ("%s." + media['data'][i]['id']) % j
-                j += 1
-            # Select the index of id to perform further operations
-            choice = int(raw_input("Select the index of id"))
-            # returning the id of the selected post
-            return media['data'][choice-1]['id']
-        else:
-            # If there is no data
-            print "There is no recent post "
-            return None
     else:
-        # If request url is incorrect or there is some other problem
-        print "Status code other than 200"
+        # url to get the most recent media of user or another user
+        url = (base_url + 'users/%s/media/recent/?access_token=%s') % (instagram_user_id, access_token)
+        # Display get url
+        print "Get post id url: %s" % url
+        # storing the data in a variable...data returned by the url is in json form
+        media = requests.get(url).json()
+        # Variable for index like 1, 2, 3...
+        j = 1
+        # Checking if request has been accepted....if accepted thn proceed
+        if media['meta']['code'] == 200:
+            # Checking if data is there or not
+            if len(media['data']):
+                # Display the id's of most recent posts
+                for i in range(len(media['data'])):
+                    print ("%s." + media['data'][i]['id']) % j
+                    j += 1
+                # Select the index of id to perform further operations
+                choice = int(raw_input("Select the index of id"))
+                # returning the id of the selected post
+                return media['data'][choice-1]['id']
+            else:
+                # If there is no data
+                print "There is no recent post "
+                return None
+        else:
+            # If request url is incorrect or there is some other problem
+            print "Status code other than 200"
 
 # Function to retrieve self or other user's information
 def users_info(instagram_username):
@@ -346,52 +346,165 @@ def get_recent_post(instagram_user_id):
     # If id is there or not
     if instagram_user_id is None:
         print "User does not exist"
-        exit()
-    # Url to fetch recent media
-    url = (base_url + "users/%s/media/recent/?access_token=%s") % (instagram_user_id, access_token)
-    # Display Get url
-    print "Get recent post request url:%s" % url
-    # Requesting get method to fetch recent  posts and response is stored in a variable
-    media = requests.get(url).json()
-    # If request has been accepted
-    if media['meta']['code'] == 200:
-        # Variable for index like 1,2,3....
-        k = 1
-        # If there are posts
-        if len(media['data']):
-            # Traversing the json array if there are more tha  one post
-            for i in range(len(media['data'])):
-                # Checking the type of image
-                if media['data'][i]['type'] == "image":
-                    print "%s. %s" % (k, media['data'][i]['id'])
-                    k += 1
-                elif media['data'][i]['type'] == "carousel":
-                    for j in range(len(media['data'][i]['carousel_media'])):
-                        print "%s. %s" % (k, media['data'][j]['id'])
-                        k += 1
-                else:
-                    print "This type of media is not supported"
-            # Taking  index as  input from user
-            choice = int(raw_input("Enter the index of post id"))
-            # asking what user want to do with the selected post
-            choice2 = int(raw_input("What u want to do??\n 1.Download post\n 2.Like post\n 3.Comment on post"))
-            # Download post
-            if choice2 == 1:
-                image_name = media['data'][choice-1]['id'] + ".jpeg"
-                image_url = media['data'][choice-1]['images']['standard_resolution']['url']
-                urllib.urlretrieve(image_url, image_name)
-                print "Your image has been downloaded!!!"
-            # like post
-            elif choice2 == 2:
-                like_a_post(instagram_user_id)
-            # Comment on post
-            elif choice2 == 3:
-                post_comment(instagram_user_id)
-        else:
-            # If no posts by user
-            print "No Post is there"
-    # If request url is incorrect or there is some other problem
     else:
+        # Url to fetch recent media
+        url = (base_url + "users/%s/media/recent/?access_token=%s") % (instagram_user_id, access_token)
+        # Display Get url
+        print "Get recent post request url:%s" % url
+        # Requesting get method to fetch recent  posts and response is stored in a variable
+        media = requests.get(url).json()
+        # If request has been accepted
+        if media['meta']['code'] == 200:
+            # Variable for index like 1,2,3....
+            k = 1
+            # If there are posts
+            if len(media['data']):
+                # Traversing the json array if there are more tha  one post
+                for i in range(len(media['data'])):
+                    # Checking the type of image
+                    if media['data'][i]['type'] == "image":
+                        print "%s. %s" % (k, media['data'][i]['id'])
+                        k += 1
+                    elif media['data'][i]['type'] == "carousel":
+                        for j in range(len(media['data'][i]['carousel_media'])):
+                            print "%s. %s" % (k, media['data'][j]['id'])
+                            k += 1
+                    else:
+                        print "This type of media is not supported"
+                # Taking  index as  input from user
+                choice = int(raw_input("Enter the index of post id"))
+                # asking what user want to do with the selected post
+                choice2 = int(raw_input("What u want to do??\n 1.Download post\n 2.Like post\n 3.Comment on post"))
+                # Download post
+                if choice2 == 1:
+                    image_name = media['data'][choice-1]['id'] + ".jpeg"
+                    image_url = media['data'][choice-1]['images']['standard_resolution']['url']
+                    urllib.urlretrieve(image_url, image_name)
+                    print "Your image has been downloaded!!!"
+                # like post
+                elif choice2 == 2:
+                    like_a_post(instagram_user_id)
+                # Comment on post
+                elif choice2 == 3:
+                    post_comment(instagram_user_id)
+            else:
+                # If no posts by user
+                print "No Post is there"
+        # If request url is incorrect or there is some other problem
+        else:
+                print "Status code other than 200"
+
+# Function for some special cases for posts
+def special_posts(instagram_user_id):
+    # If user-id is not returned
+    if instagram_user_id is None:
+        print "User does not exist"
+    else:
+        # url for fetch recent posts
+        url = base_url + "users/%s/media/recent/?access_token=%s" % (instagram_user_id, access_token)
+        # Display get request url
+        print "Get request url:%s" % url
+        # Requesting get method to fetch recent  posts and response is stored in a variable
+        recent_media = requests.get(url).json()
+        # If request has been accepted
+        if recent_media['meta']['code'] == 200:
+            # If there are posts
+            if len(recent_media['data']):
+                # Asking user which type posts want to fetch
+                print " Choose one option from the following\n" \
+                      " 1.Choose post with minimum no. of likes\n " \
+                      "2.Choose post with a particular text in caption"
+                # Taking input from user
+                choice = int(raw_input("Enter your choice"))
+                # If 1 user wants to fetch posts with minimum likes
+                if choice == 1:
+                    # list to store likes count
+                    like_list = []
+                    # list to urls
+                    url_list = []
+                    # Traversing the array
+                    for i in range(len(recent_media['data'])):
+                        # Appending the likes count in list
+                        like_list.append(recent_media['data'][i]['likes']['count'])
+                        # Appending the urls
+                        url_list.append(recent_media['data'][i]['images']['standard_resolution']['url'])
+                    # initializing the variables to the first element of list
+                    min_like_count = like_list[0]
+                    min_like_count_url = url_list[0]
+                    for j in range(len(like_list)):
+                        # checking if there is other likes count less than min_count_variable
+                        if min_like_count > like_list[j]:
+                            # if yes update the variables
+                            min_like_count = like_list[j]
+                            min_like_count_url = url_list[j]
+                    # Display the post with least likes
+                    print "Post with least count likes %s is %s" % (min_like_count, min_like_count_url)
+                    # Asking the user what you want to do with the post
+                    choice = int(raw_input("What do you want to do with the post with minimum likes??\n "
+                                           "1.Like post\n "
+                                           "2. Download post"))
+                    # If 1 like post
+                    if choice == 1:
+                        like_a_post(instagram_user_id)
+                    # If 2 download post
+                    elif choice == 2:
+                        image_name = "Minimum_like_post.jpeg"
+                        image_url = min_like_count_url
+                        urllib.urlretrieve(image_url, image_name)
+                        print "Your image has been downloaded"
+                    # wrong choice entered by user
+                    else:
+                        print "You entered wrong choice"
+                        return
+                # If 2 user wants to fetch posts with particular words in caption
+                elif choice == 2:
+                    # List to store image name
+                    image_name_list = []
+                    # List to store urls
+                    image_url_list = []
+                    # Asking the user which word want to search
+                    word = raw_input("Enter the particular word you want to search in caption??")
+                    # variable for index like 1,2,3..
+                    c = 1
+                    # Traversing the json array
+                    for i in range(len(recent_media['data'])):
+                        # If there is caption in post
+                        if recent_media['data'][i]['caption']['text'] is not None:
+                            # If the word is in caption
+                            if word in recent_media['data'][i]['caption']['text']:
+                                # name the image
+                                name_image = "%s.Post with particular word in caption.jpeg" % c
+                                c += 1
+                                # append the name to image name list
+                                image_name_list.append(name_image)
+                                # append the url to url list
+                                image_url_list.append(recent_media['data'][i]['images']['standard_resolution']['url'])
+                    # Checking if there is any post with particular word
+                    if len(image_name_list) > 0:
+                        # If yes asking the user what to do with the posts
+                        choice = int(raw_input("What you want to do with the posts with particular word in caption??\n"
+                                               "1. Like posts\n"
+                                               "2. Download posts"))
+                        # If 1 like post
+                        if choice == 1:
+                            like_a_post(instagram_user_id)
+                        # if 2 download images
+                        elif choice == 2:
+                            for k in range(len(image_name_list)):
+                                urllib.urlretrieve(image_url_list[k], image_name_list[k])
+                            print "Your images has been downloaded"
+                    # If no post with particular word display message
+                    else:
+                        print "No post with this particular word"
+                # User entered wrong choice
+                else:
+                    print "You entered wrong choice"
+                    return
+            # If there are no posts
+            else:
+                print " No recent posts"
+        # If request url is incorrect or there is some other problem
+        else:
             print "Status code other than 200"
 
 # Function to start the application
@@ -416,7 +529,9 @@ def start_bot():
               "15. Get list of comments on users post \n" \
               "16. Delete negative comments on our post\n" \
               "17. Delete negative comments on other user post\n" \
-              "18. Close Application"
+              "18  Handle posts with special cases for self\n" \
+              "19. Handle posts with special cases for other users\n" \
+              "20. Close Application"
         # Input the choice from user
         choice = int(raw_input("Enter your choice"))
         if choice == 1:
@@ -480,6 +595,12 @@ def start_bot():
                     # If not...no need to delete
                     print "You have not commented on this post"
         elif choice == 18:
+            special_posts("self")
+        elif choice == 19:
+            name = raw_input("Enter username for which you want to handle special cases")
+            user_id = get_user_id(name)
+            special_posts(user_id)
+        elif choice == 20:
             print "Closing Application.....\nClosed"
             show_menu = False
         else:
