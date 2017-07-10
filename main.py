@@ -2,6 +2,7 @@ import requests
 import urllib
 from textblob import TextBlob
 from textblob.sentiments import NaiveBayesAnalyzer
+from geopy.geocoders import Nominatim
 
 # Storing access token in a variable
 access_token = "1438763650.15994de.413f7ba570f34e6fa0f36fc4bdb6a021"
@@ -469,7 +470,7 @@ def special_posts(instagram_user_id):
                     # Traversing the json array
                     for i in range(len(recent_media['data'])):
                         # If there is caption in post
-                        if recent_media['data'][i]['caption']['text'] is not None:
+                        if recent_media['data'][i]['caption'] is not None:
                             # If the word is in caption
                             if word in recent_media['data'][i]['caption']['text']:
                                 # name the image
@@ -507,6 +508,87 @@ def special_posts(instagram_user_id):
         else:
             print "Status code other than 200"
 
+# Function to get natural calamity images
+def natural_calamity_pics():
+    # User's input for location
+    location = raw_input("Enter the location for which you want to inspect pics??")
+    # url to find coordinates
+    google_url = "https://maps.googleapis.com/maps/api/geocode/json?address=%s" % location
+    # Get location coordinates
+    location_coordinates = requests.get(google_url).json()
+    # Get latitude
+    location_latitude = location_coordinates['results'][0]['geometry']['location']['lat']
+    # Get longitude
+    location_longitude = location_coordinates['results'][0]['geometry']['location']['lng']
+    # Print coordinates  of location
+    print "coordinates of location: %s" % location
+    print "Location Longitude:%s" % location_longitude
+    print "Location Latitude: %s" % location_latitude
+    # Url to search for location
+    url = (base_url + "locations/search/?lat=%s&lng=%s&access_token=%s") % \
+          (location_latitude, location_longitude, access_token)
+    # Display get request url
+    print "Get request url for location id :%s" % url
+    # Requesting get method to fetch location info and response is stored in a variable
+    location_info = requests.get(url).json()
+    # List of natural disasters
+    disasters = ['Floods', 'Tsunami', 'Earthquakes', 'Volcanoes', 'Drought', 'Hail', 'Hurricanes', 'Thunderstorms',
+                 'Landslides', 'Tornadoes', 'Wildfire', 'Influenza', 'WinterStorm', 'Sinkholes']
+    # Variable to check if there is natural calamity
+    c = 0
+    # If request has been accepted
+    if location_info['meta']['code'] == 200:
+        # If there is some location info
+        if len(location_info['data']):
+            # Store location id
+            location_id = location_info['data'][0]['id']
+            # url to get recent media at that location
+            url2 = (base_url + "locations/%s/media/recent/?access_token=%s") % (location_id, access_token)
+            # Display get request url
+            print "Get request url for recent media :%s " % url2
+            # Requesting get method to fetch recent  posts and response is stored in a variable
+            location_recent_media = requests.get(url2).json()
+            # If request has been accepted
+            if location_recent_media['meta']['code'] == 200:
+                # If there are recent posts
+                if len(location_recent_media['data']):
+                    # Traversing the json array
+                    for i in range(len(location_recent_media['data'])):
+                        # Checking if there is caption on post
+                        if location_recent_media['data'][i]['caption'] is not None:
+                            # Traversing the disaster list
+                            for j in range(len(disasters)):
+                                # Checking if any word in list is there in caption
+                                if disasters[j] in location_recent_media['data'][i]['caption']['text']:
+                                    # If yes than download that image
+                                    print "This image is about %s in %s" % (disasters[j], location)
+                                    image_name = "%s in %s pic.jpeg" % (disasters[j], location)
+                                    image_url = location_recent_media['data'][i]['images']['standard_resolution']['url']
+                                    urllib.urlretrieve(image_url, image_name)
+                                    print "Your image has been downloaded"
+                                    c += 1
+                            # Checking if there is any natural calamity at that location
+                            if c > 0:
+                                print "There is natural calamity in this place"
+                            # If no then display message
+                            else:
+                                print "No natural calamity in this place"
+                        # if no caption in post
+                        else:
+                            print "No caption on this post"
+                # if there are no recent post for location
+                else:
+                    print "No posts for this location"
+            # If request url is incorrect or there is some other problem
+            else:
+                print "Status code other than 200"
+        # If no info about location
+        else:
+            print "Location does not exist or some other problem"
+    # If request url is incorrect or there is some other problem
+    else:
+        print "Status code other than 200"
+
 # Function to start the application
 def start_bot():
     show_menu = True
@@ -531,7 +613,8 @@ def start_bot():
               "17. Delete negative comments on other user post\n" \
               "18  Handle posts with special cases for self\n" \
               "19. Handle posts with special cases for other users\n" \
-              "20. Close Application"
+              "20. Get information about natural calamity for particular location\n" \
+              "21. Close Application"
         # Input the choice from user
         choice = int(raw_input("Enter your choice"))
         if choice == 1:
@@ -601,6 +684,8 @@ def start_bot():
             user_id = get_user_id(name)
             special_posts(user_id)
         elif choice == 20:
+            natural_calamity_pics()
+        elif choice == 21:
             print "Closing Application.....\nClosed"
             show_menu = False
         else:
