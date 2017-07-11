@@ -40,7 +40,7 @@ def get_post_id(instagram_user_id):
     try:
         # Checking if user exist or not...If not then exit
         if instagram_user_id is None:
-            print "user does not exist"
+            print colored("user does not exist", 'red')
         else:
             # url to get the most recent media of user or another user
             url = (base_url + 'users/%s/media/recent/?access_token=%s') % (instagram_user_id, access_token)
@@ -235,7 +235,8 @@ def recent_media_liked():
                 # Displaying posts with username and post-id
                 for i in range(len(recent_media['data'])):
                     print " You have recently like %s post with post id %s" \
-                          % (colored(recent_media['data'][i]['user']['username'], 'blue'), colored(recent_media['data'][i]['id'],'blue'))
+                          % (colored(recent_media['data'][i]['user']['username'], 'blue'),
+                             colored(recent_media['data'][i]['id'], 'blue'))
             else:
                 # If no post is liked recently
                 print colored("There is no media you have recently liked", 'red')
@@ -368,7 +369,7 @@ def comment_is_deleted(c_id, text, media_id):
         blob = TextBlob(comment_text, analyzer=NaiveBayesAnalyzer())
         # If negative....delete the comment
         if blob.sentiment.p_neg > blob.sentiment.p_pos:
-            print colored("Comment %s is negative" % comment_text, 'red')
+            print "Comment %s is negative" % colored(comment_text, 'red')
             url = (base_url + "media/%s/comments/%s") % (media_id, comment_id)
             print "Delete request url :%s" % url
             del_comment = requests.delete(url).json()
@@ -378,7 +379,7 @@ def comment_is_deleted(c_id, text, media_id):
                 print colored("Request is not processed", 'red')
         # If average ask the user what to do
         elif blob.sentiment.p_neg == blob.sentiment.p_pos:
-            print "Comment is average"
+            print colored("Comment is average", 'blue')
             choice = raw_input(colored("Do you want to delete comment(Y/N)??", 'green'))
             # If user says yes delete the comment
             if choice.capitalize() == "Y":
@@ -421,7 +422,7 @@ def get_recent_post(instagram_user_id):
                     for i in range(len(media['data'])):
                         # Checking the type of image
                         if media['data'][i]['type'] == "image":
-                            print "%s. %s" % (k,colored( media['data'][i]['id'], 'blue'))
+                            print "%s. %s" % (k, colored(media['data'][i]['id'], 'blue'))
                             k += 1
                         elif media['data'][i]['type'] == "carousel":
                             for j in range(len(media['data'][i]['carousel_media'])):
@@ -430,7 +431,7 @@ def get_recent_post(instagram_user_id):
                         else:
                             print colored("This type of media is not supported", 'red')
                     # Taking  index as  input from user
-                    choice = int(raw_input("Enter the index of post id"))
+                    choice = int(raw_input(colored("Enter the index of post id", 'green')))
                     # asking what user want to do with the selected post
                     print colored("What u want to do??\n "
                                   "1.Download post\n "
@@ -494,7 +495,7 @@ def special_posts(instagram_user_id):
                 if len(recent_media['data']):
                     # Asking user which type posts want to fetch
                     print colored("Choose one option from the following\n"
-                                  "1.Choose post with minimum no. of likes\n " 
+                                  " 1.Choose post with minimum no. of likes\n " 
                                   "2.Choose post with a particular text in caption\n", 'green')
                     choice = int(raw_input(colored("Enter your choice", 'blue')))
                     # If 1 user wants to fetch posts with minimum likes
@@ -563,7 +564,7 @@ def special_posts(instagram_user_id):
                         # List to store id's
                         image_id = []
                         # Asking the user which word want to search
-                        word = raw_input(colored("Enter the particular word you want to search in caption??", 'green'))
+                        word = raw_input(colored("Enter the particular word you want to search in caption??", 'blue'))
                         # variable for index like 1,2,3..
                         c = 1
                         # Traversing the json array
@@ -725,9 +726,9 @@ def start_bot():
                           "18  Handle posts with special cases for self\n"
                           "19. Handle posts with special cases for other users\n"
                           "20. Get information about natural calamity for particular location\n"
-                          "21. Close Application", 'green')
+                          "21. Close Application", 'blue')
             # Input the choice from user
-            choice = int(raw_input(colored("Enter your choice", 'blue')))
+            choice = int(raw_input(colored("Enter your choice", 'green')))
             if choice == 1:
                 users_info("self")
             elif choice == 2:
@@ -775,7 +776,8 @@ def start_bot():
             elif choice == 16:
                 delete_negative_comments("self")
             elif choice == 17:
-                name = raw_input(colored("Enter the username of user from whose post you want to delete comments", 'blue'))
+                name = raw_input(colored("Enter the username of user from whose post you want to delete comments",
+                                         'blue'))
                 user_id = get_user_id(name)
                 # get list of comments on post
                 list5 = get_comment_list(user_id)
@@ -797,7 +799,7 @@ def start_bot():
             elif choice == 20:
                 natural_calamity_pics()
             elif choice == 21:
-                print colored("Closing Application.....\nClosed", 'green')
+                print colored("Closing Application.....\nClosed", 'blue')
                 show_menu = False
             else:
                 print colored("You entered wrong choice!! Enter your choice from above list", 'red')
