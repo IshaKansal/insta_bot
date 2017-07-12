@@ -60,8 +60,11 @@ def get_post_id(instagram_user_id):
                         j += 1
                     # Select the index of id to perform further operations
                     choice = int(raw_input(colored("Select the index of id", 'green')))
-                    # returning the id of the selected post
-                    return media['data'][choice-1]['id']
+                    if choice <= len(media['data']):
+                        # returning the id of the selected post
+                        return media['data'][choice-1]['id']
+                    else:
+                        print colored("You entered wrong choice", 'red')
                 else:
                     # If there is no data
                     print colored("There is no recent post ", 'red')
@@ -104,18 +107,16 @@ def users_info(instagram_username):
         print colored("There must be some problem", 'red')
 
 # Function to get a list of likes
-def get_likes_list(instagram_user_id):
+def get_likes_list(instagram_post_id):
     try:
-        # Function call to get id of post and save it in a variable
-        media_id = get_post_id(instagram_user_id)
         # list to store the name of users who like the post
         list1 = []
         # If there are no posts
-        if media_id is None:
+        if instagram_post_id is None:
             print colored("There is no media", 'red')
         else:
             # Url to get list of likes
-            url = (base_url + "media/%s/likes/?access_token=%s") % (media_id, access_token)
+            url = (base_url + "media/%s/likes/?access_token=%s") % (instagram_post_id, access_token)
             # Display get url
             print "Get request Url:%s" % url
             # Requesting get method to get likes list and response is stored in a variable
@@ -144,16 +145,14 @@ def get_likes_list(instagram_user_id):
         print colored("There must be some problem", 'red')
 
 # Function to like a post
-def post_is_liked(instagram_user_id):
+def post_is_liked(instagram_post_id):
     try:
-        # Get id of post
-        media_id = get_post_id(instagram_user_id)
-        # If id is none then there is no post
-        if media_id is None:
+        # If there is no post
+        if instagram_post_id is None:
             print colored("There is no post", 'red')
         else:
             # url to like a post
-            url = (base_url + 'media/%s/likes') % media_id
+            url = (base_url + 'media/%s/likes') % instagram_post_id
             # Extra information to be given in case of Post method
             payload = {"access_token": access_token}
             # Display Post url
@@ -170,42 +169,40 @@ def post_is_liked(instagram_user_id):
         print colored("There must be some problem", 'red')
 
 # Function to check post will be liked or not
-def like_a_post(instagram_user_id):
+def like_a_post(instagram_post_id):
     try:
         # Get list of users who liked the post
-        list2 = get_likes_list(instagram_user_id)
+        list2 = get_likes_list(instagram_post_id)
         if list2 is not None:
             # Check if it is liked by self or not...if yes display message
             if username in list2:
                 print colored("You have already liked this post", 'red')
             else:
                 # call a function to like a post
-                post_is_liked(instagram_user_id)
+                post_is_liked(instagram_post_id)
         # If post is not liked by anyone then call a function to like post
         else:
-            post_is_liked(instagram_user_id)
+            post_is_liked(instagram_post_id)
     except:
         print colored("There must be some problem", 'red')
 
 # Function to delete like from post
-def unlike_a_post(instagram_user_id):
+def unlike_a_post(instagram_post_id):
     try:
         # Get list of users who liked the post
-        list3 = get_likes_list(instagram_user_id)
+        list3 = get_likes_list(instagram_post_id)
         # Check if list of likes is empty or user itself has not liked the post....then there is nothing to unlike
         if list3 is None or username not in list3:
             print colored("Nothing to unlike...or you have not liked this post", 'red')
         # If above conditions are not satisfied thn proceed
         else:
-            # get id of post to unlike
-            media_id = get_post_id(instagram_user_id)
-            # If no media id
-            if media_id is None:
+            # If there is no media
+            if instagram_post_id is None:
                 print colored("There is no media in this account", 'red')
             # Otherwise the post will be unlike
             else:
                 # Url to unlike a post
-                url = base_url + 'media/%s/likes/?access_token=%s' % (media_id, access_token)
+                url = base_url + 'media/%s/likes/?access_token=%s' % (instagram_post_id, access_token)
                 # Display delete like url
                 print "Delete request url: %s" % url
                 # Requesting delete method to like a post and response is stored in a variable
@@ -247,18 +244,16 @@ def recent_media_liked():
         print colored("There must be some problem", 'red')
 
 # Function to get list of comments
-def get_comment_list(instagram_user_id):
+def get_comment_list(instagram_post_id):
     try:
         list4 = []
-        # Get id of post
-        media_id = get_post_id(instagram_user_id)
         # If there are no posts
-        if media_id is None:
+        if instagram_post_id is None:
             print colored("There is no media", 'red')
         # proceed if media-id is returned
         else:
             # Url to get list of comments on a post
-            url = base_url + "media/%s/comments/?access_token=%s" % (media_id, access_token)
+            url = base_url + "media/%s/comments/?access_token=%s" % (instagram_post_id, access_token)
             # Display get request url
             print "Get request url:%s" % url
             # Requesting get method to get a list of comments on post and response is stored in a variable
@@ -288,16 +283,15 @@ def get_comment_list(instagram_user_id):
         print colored("There must be some problem", 'red')
 
 # Function to comment on a post
-def post_comment(instagram_user_id):
+def post_comment(instagram_post_id):
     try:
-        media_id = get_post_id(instagram_user_id)
         # If there are no posts
-        if media_id is None:
+        if instagram_post_id is None:
             print colored("There is no media", 'red')
         # proceed if media-id is returned
         else:
             # url to like a post
-            url = (base_url + 'media/%s/comments') % media_id
+            url = (base_url + 'media/%s/comments') % instagram_post_id
             # what user wants to comment..
             comment_text = raw_input(colored("Enter your comment", 'green'))
             # Extra information to be given in case of Post method
@@ -423,13 +417,13 @@ def get_recent_post(instagram_user_id):
                         # Checking the type of image
                         if media['data'][i]['type'] == "image":
                             print "%s. %s" % (k, colored(media['data'][i]['id'], 'blue'))
-                            k += 1
                         elif media['data'][i]['type'] == "carousel":
+                            print colored("Carousel Images", 'magenta')
                             for j in range(len(media['data'][i]['carousel_media'])):
-                                print "%s. %s" % (k, colored(media['data'][j]['id'], 'blue'))
-                                k += 1
+                                print "%s. (%s) %s" % (k, j, colored(media['data'][i]['id'], 'blue'))
                         else:
-                            print colored("This type of media is not supported", 'red')
+                            print colored("%s. This type of media is not supported", 'red') % k
+                        k += 1
                     # Taking  index as  input from user
                     choice = int(raw_input(colored("Enter the index of post id", 'green')))
                     # asking what user want to do with the selected post
@@ -465,14 +459,18 @@ def like_post_special_cases(post_id):
         if post_id is None:
             print 'No media '
         else:
-            url = (base_url + "media/%s/likes") % post_id
-            payload = {"access_token": access_token}
-            print "Post request url:%s" % url
-            post_like = requests.post(url, payload).json()
-            if post_like['meta']['code'] == 200:
-                print colored("Post liked successfully", 'blue')
+            list6 = get_likes_list(post_id)
+            if username in list6:
+                print colored("You already liked this post", 'red')
             else:
-                print colored("Status code other than 200", 'red')
+                url = (base_url + "media/%s/likes") % post_id
+                payload = {"access_token": access_token}
+                print "Post request url:%s" % url
+                post_like = requests.post(url, payload).json()
+                if post_like['meta']['code'] == 200:
+                    print colored("Post liked successfully", 'blue')
+                else:
+                    print colored("Status code other than 200", 'red')
     except:
         print colored("There must be some problem", 'red')
 
@@ -668,14 +666,28 @@ def natural_calamity_pics():
                                 for j in range(len(disasters)):
                                     # Checking if any word in list is there in caption
                                     if disasters[j] in location_recent_media['data'][i]['caption']['text']:
-                                        # If yes than download that image
-                                        print "This image is about %s in %s" % (colored(disasters[j], 'blue'),
-                                                                                colored(location, 'blue'))
-                                        image_name = "%s in %s pic.jpeg" % (disasters[j], location)
-                                        image_url = location_recent_media['data'][i]['images']['standard_resolution']['url']
-                                        urllib.urlretrieve(image_url, image_name)
-                                        print colored("Your image has been downloaded", 'blue')
-                                        c += 1
+                                        if location_recent_media['data'][i]['type'] == 'image':
+                                            # If yes than download that image
+                                            print "This image is about %s in %s" % (colored(disasters[j], 'blue'),
+                                                                                    colored(location, 'blue'))
+                                            image_name = "%s in %s pic.jpeg" % (disasters[j], location)
+                                            image_url = location_recent_media['data'][i]['images']['standard_resolution']['url']
+                                            urllib.urlretrieve(image_url, image_name)
+                                            print colored("Your image has been downloaded", 'blue')
+                                            c += 1
+                                        elif location_recent_media['data'][i]['type'] == 'carousel':
+                                            print colored("Carousel Images", 'magenta')
+                                            for k in range(len(location_recent_media['data'][i]['carousel_media'])):
+                                                # If yes than download that image
+                                                print "This image is about %s in %s" % (colored(disasters[j], 'blue'),
+                                                                                        colored(location, 'blue'))
+                                                image_name = "%s in %s pic.jpeg" % (disasters[j], location)
+                                                image_url = location_recent_media['data'][i]['carousel_media'][k]['images']['standard_resolution']['url']
+                                                urllib.urlretrieve(image_url, image_name)
+                                                print colored("Your image has been downloaded", 'blue')
+                                                c += 1
+                                        else:
+                                            print colored("This type of media in not supported", 'red')
                                 # Checking if there is any natural calamity at that location
                                 if c > 0:
                                     print colored("There is natural calamity in this place", 'blue')
@@ -726,7 +738,7 @@ def start_bot():
                           "18  Handle posts with special cases for self\n"
                           "19. Handle posts with special cases for other users\n"
                           "20. Get information about natural calamity for particular location\n"
-                          "21. Close Application", 'blue')
+                          "21. Close Application", 'magenta')
             # Input the choice from user
             choice = int(raw_input(colored("Enter your choice", 'green')))
             if choice == 1:
@@ -742,37 +754,47 @@ def start_bot():
                 user_id = get_user_id(name)
                 get_recent_post(user_id)
             elif choice == 5:
-                like_a_post("self")
+                post_id = get_post_id("self")
+                like_a_post(post_id)
             elif choice == 6:
                 name = raw_input(colored("Enter the username of user you want to like a post", 'blue'))
                 user_id = get_user_id(name)
-                like_a_post(user_id)
+                post_id = get_post_id(user_id)
+                like_a_post(post_id)
             elif choice == 7:
-                get_likes_list("self")
+                post_id = get_post_id("self")
+                get_likes_list(post_id)
             elif choice == 8:
                 name = raw_input(colored("Enter the username of user you want to get a list of likes", 'blue'))
                 user_id = get_user_id(name)
-                get_likes_list(user_id)
+                post_id = get_post_id(user_id)
+                get_likes_list(post_id)
             elif choice == 9:
-                unlike_a_post("self")
+                post_id = get_post_id("self")
+                unlike_a_post(post_id)
             elif choice == 10:
                 name = raw_input(colored("Enter the username of user you want to unlike post", 'blue'))
                 user_id = get_user_id(name)
-                unlike_a_post(user_id)
+                post_id = get_post_id(user_id)
+                unlike_a_post(post_id)
             elif choice == 11:
                 recent_media_liked()
             elif choice == 12:
-                post_comment("self")
+                post_id = get_post_id("self")
+                post_comment(post_id)
             elif choice == 13:
                 name = raw_input(colored("Enter the username of user you want to  post a comment", 'blue'))
                 user_id = get_user_id(name)
-                post_comment(user_id)
+                post_id = get_post_id(user_id)
+                post_comment(post_id)
             elif choice == 14:
-                get_comment_list("self")
+                post_id = get_post_id("self")
+                get_comment_list(post_id)
             elif choice == 15:
                 name = raw_input(colored("Enter the username of user you want to get list of comments", 'blue'))
                 user_id = get_user_id(name)
-                get_comment_list(user_id)
+                post_id = get_post_id(user_id)
+                get_comment_list(post_id)
             elif choice == 16:
                 delete_negative_comments("self")
             elif choice == 17:
