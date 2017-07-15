@@ -738,7 +738,9 @@ def start_bot():
                           "18  Handle posts with special cases for self\n"
                           "19. Handle posts with special cases for other users\n"
                           "20. Get information about natural calamity for particular location\n"
-                          "21. Close Application", 'magenta')
+                          "21. Compare Comments on self post\n"
+                          "22. Compare comments on users post\n"
+                          "23. Close Application", 'magenta')
             # Input the choice from user
             choice = int(raw_input(colored("Enter your choice", 'green')))
             if choice == 1:
@@ -801,8 +803,9 @@ def start_bot():
                 name = raw_input(colored("Enter the username of user from whose post you want to delete comments",
                                          'blue'))
                 user_id = get_user_id(name)
+                post_id = get_post_id(user_id)
                 # get list of comments on post
-                list5 = get_comment_list(user_id)
+                list5 = get_comment_list(post_id)
                 # Checking if there are comments on post
                 if list5 is not None:
                     # If Yes...checking user itself has commented on post or not
@@ -821,6 +824,16 @@ def start_bot():
             elif choice == 20:
                 natural_calamity_pics()
             elif choice == 21:
+                post_id = get_post_id("self")
+                list7 = get_comment_list(post_id)
+                plot_pie_chart(list7)
+            elif choice == 22:
+                name = raw_input("Enter the username for whose post you want to compare comments")
+                user_id = get_user_id(name)
+                post_id = get_post_id(user_id)
+                list7 = get_comment_list(post_id)
+                plot_pie_chart(list7)
+            elif choice == 23:
                 print colored("Closing Application.....\nClosed", 'blue')
                 show_menu = False
             else:
